@@ -1,0 +1,131 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<bpr:release xmlns:bpr="http://www.blueprism.co.uk/product/release">
+    <bpr:name>Internal CSV_4_29_2021</bpr:name>
+    <bpr:release-notes />
+    <bpr:created>2021-04-29 14:51:01Z</bpr:created>
+    <bpr:package-id>29</bpr:package-id>
+    <bpr:package-name>Internal CSV</bpr:package-name>
+    <bpr:user-created-by>admin</bpr:user-created-by>
+    <bpr:contents count="2">
+        <object id="dc810ef3-a5f6-4014-bd0a-fed3ce902b88" name="Nephthis - Internal CSV" xmlns="http://www.blueprism.co.uk/product/process"><process name="Nephthis - Internal CSV" version="1.0" bpversion="7.0.0.35305" narrative="" byrefcollection="true" type="object" runmode="Exclusive"><appdef><element name="Application Root"><id>eeafe320-7525-4bad-a437-599e3661f9ad</id><type>Application</type><basetype>Application</basetype><datatype>unknown</datatype><diagnose>False</diagnose></element></appdef><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view><preconditions /><endpoint narrative="" /><subsheet subsheetid="1b5cb560-7fe9-4fb6-98d5-6a48cc92c07f" type="CleanUp" published="True"><name>Clean Up</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="ccb6837c-0fae-4b1f-ab7f-2194572ff9a9" type="Normal" published="True"><name>String CSV to Collection w/ custom delimiter</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><subsheet subsheetid="977f3ade-6970-48fa-b7d7-da678a3a96c2" type="Normal" published="True"><name>String CSV to Collection</name><view><camerax>0</camerax><cameray>0</cameray><zoom version="2">1.25</zoom></view></subsheet><stage stageid="1d069f56-f34d-4049-af44-1d7ff4b5a989" name="Start" type="Start"><loginhibit /><display x="15" y="-105" /><onsuccess>8712e411-cf12-47c9-9b19-bb611f7f2a80</onsuccess></stage><stage stageid="8712e411-cf12-47c9-9b19-bb611f7f2a80" name="End" type="End"><loginhibit /><display x="15" y="90" /></stage><stage stageid="343dcaa8-cf87-468b-be22-8c5dd0ecca55" name="Stage1" type="ProcessInfo"><display x="-195" y="-105" w="150" h="90" /><references><reference>System.dll</reference><reference>System.Data.dll</reference><reference>System.Xml.dll</reference><reference>System.Drawing.dll</reference><reference>Microsoft.VisualBasic.dll</reference><reference>C:\Windows\Microsoft.NET\Framework64\v4.0.30319\System.Core.dll</reference></references><imports><import>System</import><import>System.Drawing</import><import>System.Data</import><import>System.IO</import><import>System.Collections.Generic</import><import>System.Text</import><import>Microsoft.VisualBasic</import><import>Microsoft.VisualBasic.FileIO</import><import>System.Linq</import></imports><language>csharp</language><globalcode><![CDATA[]]></globalcode><code><![CDATA[public static DataTable WriteToDataTable(string data, bool headers)
+{
+    DataTable dataTable = new DataTable();
+    /*foreach (var header in csvHeader)
+        dataTable.Columns.Add(header);*/
+
+    using (var reader = new StringReader(data))
+    {
+        TextFieldParser csvParser = new TextFieldParser(reader) { HasFieldsEnclosedInQuotes = true, Delimiters = new string[] { "," } };
+		int count =0;
+        while (!csvParser.EndOfData)
+        {
+			if(count==0)
+           {
+			   string[] columns = csvParser.ReadFields();
+			   if(headers)
+			   {
+				  foreach(string title in columns)
+				  {
+					dataTable.Columns.Add(title, typeof(String));
+				  }
+			   }
+			   else
+			   {
+				   int fields = columns.Length;
+				   int colCount=1;
+				   while(colCount<=fields)
+				   {
+					   string colName="F"+colCount.ToString();
+					   dataTable.Columns.Add(colName, typeof(String));
+					   colCount++;
+				   }				   
+				   var dataTableRow = dataTable.NewRow();
+				   dataTable.Rows.Add(columns);
+			   }
+           }  
+           else 
+           {
+                var dataTableRow = dataTable.NewRow();
+				dataTableRow.ItemArray = csvParser.ReadFields();
+				dataTable.Rows.Add(dataTableRow);
+			   //csvData.Rows.Add(fieldData);
+           }  
+		   count++;
+            
+        }
+    }
+    return dataTable;
+}
+public static DataTable WriteToDataTable(string data, bool headers, string[] delimiters)
+{
+    DataTable dataTable = new DataTable();
+    /*foreach (var header in csvHeader)
+        dataTable.Columns.Add(header);*/
+
+    using (var reader = new StringReader(data))
+    {
+        TextFieldParser csvParser = new TextFieldParser(reader) { HasFieldsEnclosedInQuotes = true, Delimiters = delimiters };
+		int count =0;
+        while (!csvParser.EndOfData)
+        {
+			if(count==0)
+           {
+			   string[] columns = csvParser.ReadFields();
+			   if(headers)
+			   {
+				  foreach(string title in columns)
+				  {
+					dataTable.Columns.Add(title, typeof(String));
+				  }
+			   }
+			   else
+			   {
+				   int fields = columns.Length;
+				   int colCount=1;
+				   while(colCount<=fields)
+				   {
+					   string colName="F"+colCount.ToString();
+					   dataTable.Columns.Add(colName, typeof(String));
+					   colCount++;
+				   }				   
+				   var dataTableRow = dataTable.NewRow();
+				   dataTable.Rows.Add(columns);
+			   }
+           }  
+           else 
+           {
+                var dataTableRow = dataTable.NewRow();
+				dataTableRow.ItemArray = csvParser.ReadFields();
+				dataTable.Rows.Add(dataTableRow);
+			   //csvData.Rows.Add(fieldData);
+           }  
+		   count++;
+            
+        }
+    }
+    return dataTable;
+}]]></code></stage><stage stageid="9f644d46-3f3c-4f2c-840c-2529e80a724a" name="Clean Up" type="SubSheetInfo"><subsheetid>1b5cb560-7fe9-4fb6-98d5-6a48cc92c07f</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="d0dfad27-634a-40f6-a50d-f1f1f1d5c61b" name="Start" type="Start"><subsheetid>1b5cb560-7fe9-4fb6-98d5-6a48cc92c07f</subsheetid><loginhibit /><display x="15" y="-105" /><onsuccess>03172837-29b1-4292-a2b7-fc9822ab77e1</onsuccess></stage><stage stageid="03172837-29b1-4292-a2b7-fc9822ab77e1" name="End" type="End"><subsheetid>1b5cb560-7fe9-4fb6-98d5-6a48cc92c07f</subsheetid><loginhibit /><display x="15" y="90" /></stage><stage stageid="5af016b4-9822-4191-b40f-cb460c2f55fe" name="String CSV to Collection" type="SubSheetInfo"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="7e07b851-28b1-4349-8b42-41cf1fffc40b" name="Note1" type="Note"><subsheetid>1b5cb560-7fe9-4fb6-98d5-6a48cc92c07f</subsheetid><narrative>Clean Up Page
+
+This is an optional page where you might choose to perform some finalisation (or "cleanup") tasks as your business object is closed down.
+
+The cleanup action will be called automatically immediately after closing your business object at the end of a business process.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than before the disposal of the business object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="9de98730-e59d-4fd7-b292-b8e9eb653e22" name="Note2" type="Note"><narrative>Initialise Page
+
+This is an optional page where you might choose to perform some initialisation tasks after your business object is loaded.
+
+The initialise action will be called automatically immediately after loading your business object.
+
+You will not be able to call this action from a business process, nor will it be called at any other time than after the creation of the object.</narrative><display x="-180" y="60" w="180" h="230" /></stage><stage stageid="59204ae9-42a8-4344-bd8e-b3975ba423f6" name="Start" type="Start"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><loginhibit /><display x="15" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><inputs><input type="text" name="CSV Value" narrative="The CSV text value" stage="CSV Value" /><input type="flag" name="First Line Is Header" narrative="Set True if you want to treat the first line as a header" stage="First Line Is Header" /></inputs><onsuccess>4a9b97f8-356b-49d7-827f-d44dcc2cb7d5</onsuccess></stage><stage stageid="b778eea6-1d43-4fee-a06b-1c59aa8d3308" name="End" type="End"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><loginhibit /><display x="15" y="-15" /><font family="Tahoma" size="10" style="Regular" color="000000" /><outputs><output type="collection" name="CSV Values" narrative="The collection populated with the values of the CSV file" stage="CSV Values" /></outputs></stage><stage stageid="6a9e3c26-a5df-4b41-a199-6f47fb7d8c84" name="CSV Value" type="Data"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><display x="90" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="4a9b97f8-356b-49d7-827f-d44dcc2cb7d5" name="Parse CSV" type="Code"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><loginhibit /><display x="15" y="-60" w="90" h="30" /><font family="Tahoma" size="10" style="Regular" color="000000" /><inputs><input type="text" name="CSV Value" expr="[CSV Value]" /><input type="flag" name="First_Line_Is_Header" expr="[First Line Is Header]" /></inputs><outputs><output type="collection" name="Values" stage="CSV Values" /></outputs><onsuccess>b778eea6-1d43-4fee-a06b-1c59aa8d3308</onsuccess><code><![CDATA[Values = WriteToDataTable(CSV_Value,First_Line_Is_Header);]]></code></stage><stage stageid="07e0408b-83d2-49c5-9d53-fdab4208ce1b" name="CSV Values" type="Collection"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><display x="105" y="0" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="6d058d6c-1af1-43e1-bea1-4f57273ce151" name="First Line Is Header" type="Data"><subsheetid>977f3ade-6970-48fa-b7d7-da678a3a96c2</subsheetid><display x="150" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>flag</datatype><initialvalue>False</initialvalue><private /><alwaysinit /></stage><stage stageid="0f4a9ec7-fc74-4160-a5b0-fe99d22a36d6" name="String CSV to Collection w/ custom delimiter" type="SubSheetInfo"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><display x="-195" y="-105" w="150" h="90" /></stage><stage stageid="10aa1225-853b-4054-9119-fb1384097241" name="Start" type="Start"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><loginhibit /><display x="15" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><inputs><input type="text" name="CSV Value" narrative="The CSV text value" stage="CSV Value" /><input type="flag" name="First Line Is Header" narrative="Set True if you want to treat the first line as a header" stage="First Line Is Header" /><input type="text" name="Delimiters" narrative="Delimiters to use when parsing the CSV text. Each character specified will be counted as a delimiter. Default comma." stage="Delimiters" /></inputs><onsuccess>e5c23a88-ad99-4a0f-ae0d-68ce483b9edb</onsuccess></stage><stage stageid="2285b70a-3f06-4193-aa5e-0339b2dad108" name="End" type="End"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><loginhibit /><display x="15" y="-15" /><font family="Tahoma" size="10" style="Regular" color="000000" /><outputs><output type="collection" name="CSV Values" narrative="The collection populated with the values of the CSV file" stage="CSV Values" /></outputs></stage><stage stageid="f600a6fb-23fa-4e89-9d8f-15f695c8d57d" name="CSV Value" type="Data"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><display x="90" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>text</datatype><initialvalue /><private /><alwaysinit /></stage><stage stageid="e5c23a88-ad99-4a0f-ae0d-68ce483b9edb" name="Parse CSV Custom" type="Code"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><loginhibit /><display x="15" y="-60" w="90" h="30" /><font family="Tahoma" size="10" style="Regular" color="000000" /><inputs><input type="text" name="CSV Value" expr="[CSV Value]" /><input type="flag" name="First_Line_Is_Header" expr="[First Line Is Header]" /><input type="text" name="Delimiters" expr="[Delimiters]" /></inputs><outputs><output type="collection" name="Values" stage="CSV Values" /></outputs><onsuccess>2285b70a-3f06-4193-aa5e-0339b2dad108</onsuccess><code><![CDATA[string[] d = new string[Delimiters.Length];
+for (int i = 0; i < Delimiters.Length; i++) {
+	d[i] = Delimiters[i].ToString();
+}
+
+Values = WriteToDataTable(CSV_Value,First_Line_Is_Header, d);]]></code></stage><stage stageid="cceb5cfe-2936-40e6-8592-63ffa38aa1db" name="CSV Values" type="Collection"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><display x="90" y="-15" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>collection</datatype><private /><alwaysinit /></stage><stage stageid="3a413a6b-3103-494d-a979-fbc5ed6be525" name="First Line Is Header" type="Data"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><display x="150" y="-105" /><font family="Tahoma" size="10" style="Regular" color="000000" /><datatype>flag</datatype><initialvalue>False</initialvalue><private /><alwaysinit /></stage><stage stageid="7bd3f77d-69e6-4eab-8285-834c6ada64ae" name="Delimiters" type="Data"><subsheetid>ccb6837c-0fae-4b1f-ab7f-2194572ff9a9</subsheetid><display x="210" y="-105" /><datatype>text</datatype><initialvalue xml:space="preserve">,</initialvalue><private /><alwaysinit /></stage></process></object>
+        <object-group id="73a384f5-0859-4fd2-8fb2-bc7e89098469" name="Nephthis" isDefaultGroup="False" xmlns="http://www.blueprism.co.uk/product/object-group">
+            <members>
+                <object id="dc810ef3-a5f6-4014-bd0a-fed3ce902b88" />
+            </members>
+        </object-group>
+    </bpr:contents>
+</bpr:release>
